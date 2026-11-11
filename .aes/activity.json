@@ -2,6 +2,193 @@
   "version": 1,
   "events": [
     {
+      "id": "fcc82b69-b358-4bec-8000-9a973f736637",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:17:22.234Z",
+      "summary": "O job do #4 aparece como `merged`, mas não foi mergeado de fato. O ciclo `ciclo_cr` (perfil `basico`) termina no review e vai direto para `…"
+    },
+    {
+      "id": "64e461f2-30a0-4c24-98e8-88d3fe342508",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:15:12.892Z",
+      "summary": "`002-testar-a-fun-o: ciclo_cr_build:READY → ciclo_cr_gate → GATE: PASS → review round 1`. O revisor de código do job 002 está rodando."
+    },
+    {
+      "id": "267b6554-ad96-4eea-8bc4-11a80ec9fffb",
+      "kind": "deed",
+      "action": "claude.file_written",
+      "title": "factory/jobs/002-testar-a-fun-o/round-1/review-code.md",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:14:52.712Z"
+    },
+    {
+      "id": "53c3987f-b57e-4ae0-b5d5-72a6270352bb",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:14:37.640Z",
+      "summary": "`002-testar-a-fun-o: ciclo_cr_spec:DONE → ciclo_cr_build round 1`. O builder do job 002 está rodando. Uma divergência na spec: o `soma.js` …"
+    },
+    {
+      "id": "a8e17ae0-ef3b-4bb0-a68d-d8dd811f5609",
+      "kind": "deed",
+      "action": "claude.committed",
+      "title": "feat(pipeline): add comprehensive factory pipeline configuration with multiple stages and profiles",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:14:21.544Z"
+    },
+    {
+      "id": "97e29697-671e-4274-bcc3-dbdfd8a48ff7",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:14:09.818Z",
+      "summary": "O job do #3 sumiu: a pasta `factory/jobs/001-corrigir-o-bug-da/` foi apagada enquanto o intake rodava. O agente chegou a dar ACCEPT, mas o …"
+    },
+    {
+      "id": "17ccb0ef-da41-4953-8581-b7a99d8395d7",
+      "kind": "deed",
+      "action": "claude.file_written",
+      "title": "factory/jobs/002-testar-a-fun-o/spec.md",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:13:44.437Z"
+    },
+    {
+      "id": "3a36d20c-fa66-43d2-b847-ccb1e7c24655",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:13:33.751Z",
+      "summary": "`002-testar-a-fun-o: ciclo_cr_intake:ACCEPT → ciclo_cr_spec round 0`. O agente de spec do job 002 está rodando, e o intake do job 001 ainda…"
+    },
+    {
+      "id": "a55c5fe5-256d-4c06-9b1e-ebcd5b60d7d2",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:13:20.384Z",
+      "summary": "Criei dois jobs (#3 → 001-corrigir-o-bug-da, #4 → 002-testar-a-fun-o) e os dois estão na etapa de intake. Aviso quando os agentes terminare…"
+    },
+    {
+      "id": "e7fb3bf4-32fb-4637-8d52-de4120ce408e",
+      "kind": "deed",
+      "action": "claude.file_written",
+      "title": "factory/jobs/001-corrigir-o-bug-da/intake.md",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:13:16.110Z"
+    },
+    {
+      "id": "e242badd-304d-41b5-82fb-03d8a463ada3",
+      "kind": "deed",
+      "action": "claude.file_written",
+      "title": "factory/jobs/002-testar-a-fun-o/intake.md",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:13:06.931Z"
+    },
+    {
+      "id": "7788594b-646f-422b-bcda-e9b5b98134c2",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:12:57.008Z"
+    },
+    {
+      "id": "d232f93c-3d31-4fb5-90ab-18a92bf25716",
+      "kind": "deed",
+      "action": "claude.session_started",
+      "title": "startup",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T13:12:31.844Z"
+    },
+    {
+      "id": "b35db0fb-0bf5-4a34-b333-f0b96137a92a",
+      "kind": "deed",
+      "action": "task.pipeline",
+      "title": "WORK-4",
+      "actor": "Leonardo solar",
+      "summary": "factory/tasks/WORK-4.yaml",
+      "timestamp": "2026-11-11T13:12:22.801Z"
+    },
+    {
+      "id": "36928072-9e46-44e7-9153-655331b4a2fb",
+      "kind": "deed",
+      "action": "task.pipeline",
+      "title": "WORK-4",
+      "actor": "Leonardo solar",
+      "summary": "factory/tasks/WORK-4.yaml",
+      "timestamp": "2026-11-11T13:12:19.344Z"
+    },
+    {
+      "id": "7a803375-1647-4666-bcb9-2ba8d260c215",
+      "kind": "deed",
+      "action": "task.pipeline",
+      "title": "WORK-4",
+      "actor": "Leonardo solar",
+      "summary": "factory/tasks/WORK-4.yaml",
+      "timestamp": "2026-11-11T13:10:36.758Z"
+    },
+    {
+      "id": "4f43e8ff-4ed0-46ab-8c56-bf3a359fc1c0",
+      "kind": "deed",
+      "action": "cycle.updated",
+      "title": "c_r",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T12:37:40.670Z"
+    },
+    {
+      "id": "ddcee92a-485a-400b-832a-487ed1f07e51",
+      "kind": "deed",
+      "action": "pipeline.saved",
+      "title": "factory/pipeline.yaml",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T12:37:40.665Z"
+    },
+    {
+      "id": "f8fb9920-2f07-4a3e-b949-8104f52ec168",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T12:31:54.836Z",
+      "summary": "Não havia nada para rodar. O único job, 001-corrigi-um-bug-soma (issue #1), continua parado esperando sua resposta às perguntas do intake. …"
+    },
+    {
+      "id": "a8b87131-a92e-42a0-86f0-4c13991a568b",
+      "kind": "deed",
+      "action": "cycle.updated",
+      "title": "correcao_rapida",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T12:31:10.385Z"
+    },
+    {
+      "id": "da49a3f8-d1a5-419c-a223-5069a9a59e1c",
+      "kind": "deed",
+      "action": "pipeline.saved",
+      "title": "factory/pipeline.yaml",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T12:31:10.380Z"
+    },
+    {
+      "id": "35e84225-8c23-4067-baf3-8cf2522671ed",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T12:09:48.229Z",
+      "summary": "O queue ficou vazio. O único job, 001-corrigi-um-bug-soma (issue #1), está parado esperando sua resposta. ``` 001-corrigi-um-bug-soma: corr…"
+    },
+    {
       "id": "3bfabdb6-2260-4f28-8eeb-67943170dd00",
       "kind": "deed",
       "action": "claude.responded",

@@ -241,36 +241,66 @@ steps:
     next: { DONE: "@done", FAIL: "@human" }
     needs: [merge]
 
-  correcao_rapida_intake:
+  ciclo_cr_intake:
     phase: discover
     label: Intake
     run: { agent: intake, model: haiku }
     reads: [issue.md]
     writes: intake.md
-    next: { ACCEPT: "@next", NEEDS-INFO: "@wait-author", REJECT: "@rejected" }
+    next: { ACCEPT: ciclo_cr_spec, NEEDS-INFO: "@next", REJECT: "@rejected" }
     after: [route, comment-issue, worktree]
     required: true
 
-  correcao_rapida_build:
+  ciclo_cr_spec:
+    phase: design
+    label: Spec
+    run: { agent: spec-writer, model: haiku }
+    reads: [issue.md, intake.md]
+    writes: spec.md
+    next: { DONE: ciclo_cr_build, BLOCKED: "@human" }
+
+  ciclo_cr_build:
     phase: build
     label: Build
-    run: { agent: builder, resume: true, model: sonnet }
-    reads: [issue.md]
+    run: { agent: ciclo-cr-build, resume: true, model: sonnet }
+    reads: [issue.md, spec.md]
     writes: build.md
-    next: { READY: "@next", BLOCKED: "@human" }
+    next: { READY: ciclo_cr_gate, BLOCKED: "@human" }
     after: [pushed]
     starts_round: true
     required: true
     port: 0
 
-  correcao_rapida_review_code:
+  ciclo_cr_gate:
+    phase: verify
+    label: Gate
+    run: { script: factory/bin/gate }
+    writes: "round-{n}/checks.md"
+    next: { PASS: "@next", FAIL: ciclo_cr_build }
+
+  ciclo_cr_review_code:
     phase: verify
     label: "Code review"
-    group: correcao_rapida_review
+    group: ciclo_cr_ciclo_cr_correcao_rapida_review
     run: { agent: reviewer-code, model: haiku }
     writes: "round-{n}/review-code.md"
-    next: { PASS: "@done", CHANGES: correcao_rapida_build }
+    next: { PASS: "@done", CHANGES: ciclo_cr_build }
     reads: [build.md]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # Perfis: quais etapas ficam ligadas. Etapa fora do perfil é pulada (sem seta solta).
 profiles:
@@ -280,7 +310,7 @@ profiles:
   feature_large: { label: Feature grande, steps: [intake, intent, prd, prototype, spec, techspec, plan, tasks, build, gate, review_code, review_ux, review_ui, review_security, pr, approve, merge] }
   docs:          { label: Só documentação, steps: [intake, build, review_code, pr, approve, merge] }
   full:          { label: "Tudo, incluindo Operate", steps: [intake, intent, prd, prototype, spec, techspec, plan, tasks, build, gate, review_code, review_ux, review_ui, review_security, pr, approve, merge, operate] }
-  basico: { label: "Básico", steps: [correcao_rapida_intake, correcao_rapida_build, correcao_rapida_review_code] }
+  basico: { label: "Básico", steps: [ciclo_cr_intake, ciclo_cr_spec, ciclo_cr_build, ciclo_cr_gate, ciclo_cr_review_code] }
 
 # Ciclos: perfil(s) + modo de aprovação + troca de executores. profile: auto = a rota do intake escolhe.
 # A fábrica vem só com a Fábrica v2. Cadastre outros em Configurações → "＋ Novo ciclo (assistente)"
@@ -290,7 +320,7 @@ cycles:
     label: Fábrica v2 (revisores roteados)
     profile: v2
     approval: auto
-  correcao_rapida:
+  ciclo_cr:
     label: "Correção rápida"
     description: "Bug ou ajuste pequeno: spec curta, build, checagens, revisão e PR"
     profile: basico

@@ -1,32 +1,48 @@
 {
   "version": 1,
   "project": "novo-teste-aes-simple04",
-  "next": 2,
+  "next": 5,
   "items": [
     {
-      "id": "t1794398098044",
-      "key": "WORK-1",
-      "title": "corrigi um bug soma",
-      "description": "",
+      "id": "t1794402575590",
+      "key": "WORK-4",
+      "title": "Testar a função",
+      "description": "teste e corrija a função soma",
       "assignee": "",
       "stage": "Intake",
       "priority": "Medium",
       "type": "Task",
       "comments": [],
       "pipeline": {
-        "cycle": "correcao_rapida",
+        "cycle": "ciclo_cr",
         "profile": "basico",
         "mode": "auto",
         "blocks": [
-          "correcao_rapida_intake",
-          "correcao_rapida_build",
-          "correcao_rapida_review_code"
+          "ciclo_cr_intake",
+          "ciclo_cr_spec",
+          "ciclo_cr_build",
+          "ciclo_cr_gate",
+          "ciclo_cr_review_code"
         ],
         "config": {}
       },
-      "githubIssueUrl": "https://github.com/leonardorsolar/novo-teste-aes-simple04/issues/1",
-      "issueNumber": 1,
-      "jobId": "001-corrigi-um-bug-soma"
+      "githubIssueUrl": "https://github.com/leonardorsolar/novo-teste-aes-simple04/issues/4",
+      "issueNumber": 4,
+      "jobId": "002-testar-a-fun-o"
+    },
+    {
+      "id": "gh-3",
+      "key": "#3",
+      "assignee": "",
+      "priority": "Medium",
+      "type": "Task",
+      "stage": "Intake",
+      "comments": [],
+      "title": "corrigir o bug da soma",
+      "description": "corrigir o bug da soma\nfaça o teste e corrija",
+      "jobId": "001-corrigir-o-bug-da",
+      "githubIssueUrl": "https://github.com/leonardorsolar/novo-teste-aes-simple04/issues/3",
+      "issueNumber": 3
     }
   ]
 }

@@ -1,0 +1,9 @@
+# Escolhas da tela para esta tarefa (Tasks → Escolher pipeline). Lido por factory/bin/job create.
+# Edite pela tela ou aqui; factory/bin/factory validate confere.
+key: WORK-3
+title: "corrigir o bug da soma"
+issue: 3
+cycle: ciclo_cr
+profile: basico
+approval: auto
+active: [ciclo_cr_intake, ciclo_cr_spec, ciclo_cr_build, ciclo_cr_review_code]
