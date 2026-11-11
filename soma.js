@@ -3,3 +3,5 @@ function soma(a) {
 }
 
 console.log(soma(5, 10)); // Resultado: 15 (correto)
+
+module.exports = { soma };
