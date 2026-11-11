@@ -1,0 +1,89 @@
+{
+  "version": 1,
+  "events": [
+    {
+      "id": "3bfabdb6-2260-4f28-8eeb-67943170dd00",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T12:08:01.796Z",
+      "summary": "The intake asked the author a question, but recording it failed: the `factory:needs-info` label doesn't exist on GitHub yet. I'm creating t…"
+    },
+    {
+      "id": "83da1acb-3acf-45e4-9cf3-bbc80ee48119",
+      "kind": "deed",
+      "action": "claude.file_written",
+      "title": "factory/jobs/001-corrigi-um-bug-soma/intake.md",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T12:07:17.600Z"
+    },
+    {
+      "id": "96b8bf15-797c-4eb0-a005-209258316a91",
+      "kind": "deed",
+      "action": "claude.responded",
+      "title": "",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T12:07:10.197Z"
+    },
+    {
+      "id": "f65c5cc5-1383-4069-8576-507d83e856dd",
+      "kind": "deed",
+      "action": "task.pipeline",
+      "title": "WORK-1",
+      "actor": "Leonardo solar",
+      "summary": "factory/tasks/WORK-1.yaml",
+      "timestamp": "2026-11-11T12:06:02.909Z"
+    },
+    {
+      "id": "285489f8-a249-4ab7-8adf-c596c38ad97a",
+      "kind": "deed",
+      "action": "task.pipeline",
+      "title": "WORK-1",
+      "actor": "Leonardo solar",
+      "summary": "factory/tasks/WORK-1.yaml",
+      "timestamp": "2026-11-11T11:56:18.413Z"
+    },
+    {
+      "id": "fc37d22d-2f59-4797-9d12-91a73e293901",
+      "kind": "deed",
+      "action": "cycle.created",
+      "title": "correcao_rapida",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T11:53:29.056Z"
+    },
+    {
+      "id": "682814af-36d2-4a1c-a0af-4174fa1f3c85",
+      "kind": "deed",
+      "action": "pipeline.saved",
+      "title": "factory/pipeline.yaml",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T11:53:29.054Z"
+    },
+    {
+      "id": "3d0fc9e6-ce41-41b1-af6b-0ec1e6ceaf17",
+      "kind": "deed",
+      "action": "claude.session_started",
+      "title": "startup",
+      "actor": "Claude",
+      "timestamp": "2026-11-11T11:24:53.234Z"
+    },
+    {
+      "id": "eb156450-4c0e-48c6-8b36-4b96c3789a7f",
+      "kind": "deed",
+      "action": "onboarding.finished",
+      "title": "",
+      "actor": "Leonardo solar",
+      "timestamp": "2026-11-11T11:22:37.612Z"
+    },
+    {
+      "id": "77e8c01d-1ca6-4a41-bc6e-d07ac1eebd5d",
+      "kind": "deed",
+      "action": "project.selected",
+      "title": "novo-teste-aes-simple04",
+      "actor": "Leonardo solar",
+      "summary": "0 items",
+      "timestamp": "2026-11-11T11:19:28.420Z"
+    }
+  ]
+}

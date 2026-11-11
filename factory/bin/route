@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Map intake's RISK, SURFACES and ROUTE to the job's profile, steps and models.
+# The rules live in factory/pipeline.yaml `routing`; the `route` effect after intake runs this
+# same code. Usage: route <job-id>
+exec "$(dirname "$0")/job" route "$@"

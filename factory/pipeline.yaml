@@ -1,0 +1,320 @@
+# Pipeline da fábrica: a ÚNICA fonte de configuração.
+#
+# Quem lê este arquivo:
+#   - a tela (Tasks → Escolher pipeline, Pipeline 2, aba "YAML avançado");
+#   - o motor: factory/bin/job (estado e transições), factory/bin/gate, factory/bin/route;
+#   - o orquestrador: a skill /factory só executa o que `factory/bin/job next <job>` mandar.
+#
+# Para mudar a fábrica, edite aqui (pela tela ou à mão) e rode:
+#   factory/bin/factory validate      confere o arquivo e os agentes/skills/scripts citados
+#   factory/bin/factory plan <ciclo>   mostra a ordem efetiva das etapas
+#
+# Formato: YAML simples (mapas, listas, [a, b], {a: b}, comentários). Sem âncoras (&, *)
+# e sem textos multilinha (| ou >): textos longos ficam em factory/prompts/<nome>.md.
+# Jobs em andamento não mudam: cada job grava uma cópia em factory/jobs/<id>/pipeline.lock.json.
+
+version: 1
+
+project:
+  base_branch: main
+  merge_method: merge          # merge | squash | rebase (o que o repositório permite)
+  concurrency: 3               # jobs rodando ao mesmo tempo
+  max_rounds: 3                # rodadas build → gate → revisão antes de chamar um humano
+  checks: factory/scripts/gate.sh   # checagens do projeto; o gate e o hook do builder rodam este script
+  labels: { queue: factory, needs_info: "factory:needs-info", needs_human: "factory:needs-human" }
+  protected_paths: [factory/pipeline.yaml, factory/scripts/gate.sh]   # o gate reprova branch que altere estes
+  ports: { base: 5100, step: 10 }   # porta do job n = base + step*n + port da etapa
+
+defaults:
+  cycle: v2                    # ciclo usado quando a tarefa não escolhe outro
+
+# Modo de aprovação: depois de quais etapas o job PARA e espera `factory/bin/job approve <job>`.
+approval: stop_at_pr           # manual | stop_at_pr | auto (o ciclo ou a tarefa podem trocar)
+approval_modes:
+  manual:     { label: "Manual: aprovo cada etapa", pause_after: all }
+  stop_at_pr: { label: "Para no PR", pause_after: [pr] }
+  auto:       { label: "Automático: o approver faz o merge", pause_after: [] }
+
+# Fases = colunas do desenho e do kanban, nesta ordem.
+phases:
+  - { id: discover, label: Discover, column: To Do }
+  - { id: design, label: Design, column: In Progress }
+  - { id: build, label: Build, column: In Progress }
+  - { id: verify, label: Verify, column: In Review }
+  - { id: deliver, label: Deliver, column: In Review }
+  - { id: operate, label: Operate, column: Done }
+
+# Etapas, na ordem de execução. Campos:
+#   phase         uma das fases acima
+#   run           quem executa, exatamente um de:
+#                   agent: <nome>    → .claude/agents/<nome>.md
+#                   skill: <nome>    → .claude/skills/<nome>/SKILL.md (com agent: <nome> junto,
+#                                      a skill roda dentro desse agente)
+#                   script: <path>   → executável; exit 0 = 1º veredito de `next`, outro = 2º
+#                   human: true      → o job espera `factory/bin/job answer <job> <VEREDITO>`
+#                   ci: true         → idem, para algo fora da fábrica (deploy, CI)
+#                 e opcionalmente model (haiku | sonnet | opus | fable) e resume (agente retomado a cada rodada)
+#   prompt        instruções extras da etapa (arquivo em factory/prompts/)
+#   reads         arquivos da pasta do job que a etapa lê; {n} = rodada atual
+#   writes        o arquivo que a etapa grava; a 1ª linha é o veredito
+#   next          veredito → destino: outra etapa, "@next", "@done", "@human", "@wait-author", "@rejected"
+#                 Destino desligado no perfil = a próxima etapa ligada. Voltar para trás só para
+#                 uma etapa com starts_round (o laço é limitado por project.max_rounds).
+#   after         efeitos rodados quando a etapa avança para frente (route, worktree, comment-issue,
+#                 pushed) ou caminho de um script seu
+#   group         etapas seguidas com o mesmo grupo rodam em paralelo; avançam quando todas terminam
+#   needs         de quais etapas esta depende (só para o desenho na tela)
+#   starts_round  entrar nesta etapa abre uma nova rodada (round-<n>/)
+#   required      não pode ser desligada em nenhum perfil
+#   confirm       ação pública/irreversível: a tela avisa antes
+#   port          deslocamento da porta do job (agentes que abrem páginas)
+#   label         nome curto na tela
+steps:
+  intake:
+    phase: discover
+    label: Intake
+    run: { agent: intake }
+    reads: [issue.md]
+    writes: intake.md
+    next: { ACCEPT: "@next", NEEDS-INFO: "@wait-author", REJECT: "@rejected" }
+    after: [route, comment-issue, worktree]
+    required: true
+
+  intent:
+    phase: discover
+    label: Intent
+    run: { skill: sdlc-intent, model: opus }
+    reads: [issue.md, intake.md]
+    writes: intent.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [intake]
+
+  prd:
+    phase: discover
+    label: PRD
+    run: { agent: doc-writer, model: opus }
+    prompt: factory/prompts/prd.md
+    reads: [issue.md, intake.md, intent.md]
+    writes: prd.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [intent]
+
+  prototype:
+    phase: design
+    label: Prototype
+    run: { agent: doc-writer, model: sonnet }
+    prompt: factory/prompts/prototype.md
+    reads: [intake.md, intent.md]
+    writes: prototype.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [intent]
+
+  spec:
+    phase: design
+    label: Spec
+    run: { agent: spec-writer }
+    reads: [issue.md, intake.md, intent.md, prd.md]
+    writes: spec.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [intent, prd]
+
+  techspec:
+    phase: design
+    label: TechSpec
+    run: { agent: doc-writer, model: opus }
+    prompt: factory/prompts/techspec.md
+    reads: [spec.md]
+    writes: techspec.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [spec]
+
+  plan:
+    phase: design
+    label: Plan
+    run: { skill: sdlc-plan, model: opus }
+    reads: [intent.md, spec.md, techspec.md, prototype.md]
+    writes: plan.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [techspec, prototype]
+
+  tasks:
+    phase: design
+    label: Tasks
+    run: { agent: doc-writer, model: sonnet }
+    prompt: factory/prompts/tasks.md
+    reads: [spec.md, plan.md]
+    writes: tasks.md
+    next: { DONE: "@next", BLOCKED: "@human" }
+    needs: [plan]
+
+  build:
+    phase: build
+    label: Build
+    run: { agent: builder, resume: true }
+    reads: [spec.md, plan.md, tasks.md]
+    writes: build.md
+    next: { READY: "@next", BLOCKED: "@human" }
+    after: [pushed]
+    starts_round: true
+    required: true
+    port: 0
+    needs: [tasks]
+
+  gate:
+    phase: verify
+    label: Gate
+    run: { script: factory/bin/gate }
+    writes: "round-{n}/checks.md"
+    next: { PASS: "@next", FAIL: build }
+    needs: [build]
+
+  review_code:
+    phase: verify
+    label: Code review
+    group: review
+    run: { agent: reviewer-code, model: haiku }
+    writes: "round-{n}/review-code.md"
+    next: { PASS: "@next", CHANGES: build }
+    needs: [gate]
+
+  review_ux:
+    phase: verify
+    label: UX review
+    group: review
+    run: { agent: reviewer-ux, model: sonnet }
+    writes: "round-{n}/review-ux.md"
+    next: { PASS: "@next", CHANGES: build }
+    port: 1
+    needs: [gate]
+
+  review_ui:
+    phase: verify
+    label: UI review
+    group: review
+    run: { agent: reviewer-ui, model: haiku }
+    writes: "round-{n}/review-ui.md"
+    next: { PASS: "@next", CHANGES: build }
+    port: 2
+    needs: [gate]
+
+  review_security:
+    phase: verify
+    label: Security review
+    group: review
+    run: { agent: reviewer-security, model: opus }
+    writes: "round-{n}/review-security.md"
+    next: { PASS: "@next", CHANGES: build }
+    needs: [gate]
+
+  pr:
+    phase: deliver
+    label: PR
+    run: { script: factory/scripts/pr.sh }
+    writes: pr.md
+    next: { PASS: "@next", FAIL: "@human" }
+    required: true
+    needs: [review_code, review_ux, review_ui, review_security]
+
+  approve:
+    phase: deliver
+    label: Approve
+    run: { agent: approver }
+    writes: decision.md
+    next: { APPROVE: "@next", ESCALATE: "@human" }
+    needs: [pr]
+
+  merge:
+    phase: deliver
+    label: Merge
+    run: { script: factory/scripts/merge.sh }
+    writes: merge.md
+    next: { MERGED: "@done", FAIL: "@human" }
+    confirm: true
+    required: true
+    needs: [approve]
+
+  operate:
+    phase: operate
+    label: Operate
+    run: { ci: true }
+    writes: operate.md
+    next: { DONE: "@done", FAIL: "@human" }
+    needs: [merge]
+
+  correcao_rapida_intake:
+    phase: discover
+    label: Intake
+    run: { agent: intake, model: haiku }
+    reads: [issue.md]
+    writes: intake.md
+    next: { ACCEPT: "@next", NEEDS-INFO: "@wait-author", REJECT: "@rejected" }
+    after: [route, comment-issue, worktree]
+    required: true
+
+  correcao_rapida_build:
+    phase: build
+    label: Build
+    run: { agent: builder, resume: true, model: sonnet }
+    reads: [issue.md]
+    writes: build.md
+    next: { READY: "@next", BLOCKED: "@human" }
+    after: [pushed]
+    starts_round: true
+    required: true
+    port: 0
+
+  correcao_rapida_review_code:
+    phase: verify
+    label: "Code review"
+    group: correcao_rapida_review
+    run: { agent: reviewer-code, model: haiku }
+    writes: "round-{n}/review-code.md"
+    next: { PASS: "@done", CHANGES: correcao_rapida_build }
+    reads: [build.md]
+
+# Perfis: quais etapas ficam ligadas. Etapa fora do perfil é pulada (sem seta solta).
+profiles:
+  v2:            { label: Fábrica v2, steps: [intake, spec, build, gate, review_code, pr, approve, merge] }
+  bug:           { label: Bug simples, steps: [intake, build, gate, review_code, pr, approve, merge] }
+  feature:       { label: Feature média, steps: [intake, intent, spec, tasks, build, gate, review_code, review_security, pr, approve, merge] }
+  feature_large: { label: Feature grande, steps: [intake, intent, prd, prototype, spec, techspec, plan, tasks, build, gate, review_code, review_ux, review_ui, review_security, pr, approve, merge] }
+  docs:          { label: Só documentação, steps: [intake, build, review_code, pr, approve, merge] }
+  full:          { label: "Tudo, incluindo Operate", steps: [intake, intent, prd, prototype, spec, techspec, plan, tasks, build, gate, review_code, review_ux, review_ui, review_security, pr, approve, merge, operate] }
+  basico: { label: "Básico", steps: [correcao_rapida_intake, correcao_rapida_build, correcao_rapida_review_code] }
+
+# Ciclos: perfil(s) + modo de aprovação + troca de executores. profile: auto = a rota do intake escolhe.
+# A fábrica vem só com a Fábrica v2. Cadastre outros em Configurações → "＋ Novo ciclo (assistente)"
+# ou importe um JSON (formato aes-cycle).
+cycles:
+  v2:
+    label: Fábrica v2 (revisores roteados)
+    profile: v2
+    approval: auto
+  correcao_rapida:
+    label: "Correção rápida"
+    description: "Bug ou ajuste pequeno: spec curta, build, checagens, revisão e PR"
+    profile: basico
+    profiles: [basico]
+    approval: auto
+
+# Roteamento (script factory/bin/route, rodado depois do intake ACCEPT).
+#   risk      RISK do intake.md → etapas ligadas e seus modelos
+#   surfaces  cada SURFACES do intake.md → etapas extras e seus modelos
+#   route_to_profile / default_profile  ROUTE do intake.md → perfil, quando o ciclo usa profile: auto
+routing:
+  risk:
+    low: { review_code: haiku }
+    medium: { review_code: sonnet }
+    high: { review_code: sonnet }
+  surfaces:
+    ui: { review_ux: sonnet, review_ui: haiku }
+    security: { review_security: opus }
+  route_to_profile: { bug: bug, feature: feature, feature_large: feature_large, docs: docs }
+  default_profile: feature_large
+
+# Custo (USD por milhão de tokens), usado no resumo e no dashboard.
+prices:
+  claude-fable-5-1: { input: 10.0, output: 50.0, cache_write_5m: 12.5, cache_write_1h: 20.0, cache_read: 0.25 }
+  claude-opus-5-5: { input: 4.0, output: 20.0, cache_write_5m: 5.0, cache_write_1h: 8.0, cache_read: 0.20 }
+  claude-sonnet-5-5: { input: 2.0, output: 10.0, cache_write_5m: 2.5, cache_write_1h: 4.0, cache_read: 0.20 }
+  claude-haiku-5-5: { input: 0.10, output: 0.50, cache_write_5m: 0.125, cache_write_1h: 0.20, cache_read: 0.01 }

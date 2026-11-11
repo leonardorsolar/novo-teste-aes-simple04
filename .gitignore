@@ -1,1 +1,4 @@
 # Arquivo .gitignore
+/factory/jobs/
+/.worktrees/
+__pycache__/

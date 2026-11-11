@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "project": "novo-teste-aes-simple04",
+  "next": 2,
+  "items": [
+    {
+      "id": "t1794398098044",
+      "key": "WORK-1",
+      "title": "corrigi um bug soma",
+      "description": "",
+      "assignee": "",
+      "stage": "Intake",
+      "priority": "Medium",
+      "type": "Task",
+      "comments": [],
+      "pipeline": {
+        "cycle": "correcao_rapida",
+        "profile": "basico",
+        "mode": "auto",
+        "blocks": [
+          "correcao_rapida_intake",
+          "correcao_rapida_build",
+          "correcao_rapida_review_code"
+        ],
+        "config": {}
+      },
+      "githubIssueUrl": "https://github.com/leonardorsolar/novo-teste-aes-simple04/issues/1",
+      "issueNumber": 1,
+      "jobId": "001-corrigi-um-bug-soma"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+# Escolhas da tela para esta tarefa (Tasks → Escolher pipeline). Lido por factory/bin/job create.
+# Edite pela tela ou aqui; factory/bin/factory validate confere.
+key: WORK-1
+title: "corrigi um bug soma"
+issue: 1
+cycle: correcao_rapida
+profile: basico
+approval: auto
+active: [correcao_rapida_intake, correcao_rapida_build, correcao_rapida_review_code]

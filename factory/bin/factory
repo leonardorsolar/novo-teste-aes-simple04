@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+"""Check and explain factory/pipeline.yaml.
+
+Usage:
+  factory validate [<file>]                  check the pipeline (and every task in factory/tasks/)
+  factory plan [<cycle>] [--profile <p>] [--surfaces ui,security] [--risk low|medium|high]
+                                             the effective order of steps and where each verdict goes
+  factory json [<file>]                      the parsed pipeline as JSON (what the page and the motor see)
+"""
+
+import json
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import _pipeline as P  # noqa: E402
+
+REPO = Path(__file__).resolve().parents[2]
+
+
+def die(msg):
+    print(f"factory: {msg}", file=sys.stderr)
+    sys.exit(1)
+
+
+def read(path=None):
+    try:
+        if path:
+            return P.parse_yaml(Path(path).read_text(), path)
+        return P.load(REPO)
+    except (P.YamlError, P.Invalid) as e:
+        die(str(e))
+
+
+def cmd_validate(args):
+    cfg = read(args[0] if args else None)
+    errors, warns = P.validate(cfg, REPO)
+    tasks = REPO / "factory" / "tasks"
+    if not errors and tasks.exists():
+        for t in sorted(tasks.glob("*.yaml")):
+            try:
+                task = P.parse_yaml(t.read_text(), f"factory/tasks/{t.name}") or {}
+            except P.YamlError as e:
+                errors.append(str(e))
+                continue
+            errors += [f"factory/tasks/{t.name}: {e}" for e in P.validate_task(cfg, task)]
+    for w in warns:
+        print(f"aviso: {w}")
+    for e in errors:
+        print(f"erro: {e}")
+    if errors:
+        sys.exit(1)
+    print(f"ok: {len(cfg['steps'])} etapas, {len(cfg['profiles'])} perfis, {len(cfg['cycles'])} ciclos")
+
+
+def cmd_plan(args):
+    cfg = read()
+    errors, _ = P.validate(cfg)
+    if errors:
+        die("pipeline.yaml inválido; rode `factory validate`")
+    cycle, profile, surfaces, risk = None, None, [], None
+    it = iter(args)
+    for a in it:
+        if a == "--profile":
+            profile = next(it, None)
+        elif a == "--surfaces":
+            surfaces = [s for s in next(it, "").split(",") if s]
+        elif a == "--risk":
+            risk = next(it, None)
+        elif cycle is None:
+            cycle = a
+        else:
+            die(__doc__.strip())
+    try:
+        lock = P.resolve(cfg, cycle=cycle, profile=profile)
+        lock = P.route(cfg, lock, {"risk": risk or "low", "surfaces": surfaces, "route": None})
+    except P.Invalid as e:
+        die(str(e))
+    print(f"ciclo {lock['cycle']} · perfil {lock['profile']} · aprovação {lock['approval']}"
+          f" (pausa depois de: {lock['pause_after'] if lock['pause_after'] != 'all' else 'todas'})")
+    for i, line in enumerate(P.plan_lines(lock), 1):
+        print(f"{i:2}. {line}")
+
+
+def main(argv):
+    if not argv or argv[0] in {"-h", "--help"}:
+        print(__doc__.strip())
+    elif argv[0] == "validate":
+        cmd_validate(argv[1:])
+    elif argv[0] == "plan":
+        cmd_plan(argv[1:])
+    elif argv[0] == "json":
+        print(json.dumps(read(argv[1] if len(argv) > 1 else None), indent=2, ensure_ascii=False))
+    else:
+        die(__doc__.strip())
+
+
+if __name__ == "__main__":
+    main(sys.argv[1:])
